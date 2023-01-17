@@ -1,6 +1,7 @@
 ﻿# Script for Common PowerShell-Only O365 Features
 # Log In
 # Patrick W.
+# Boring pointless addition for push request
 function loginfunc{
 Import-Module ExchangeOnlineManagement
 Write-Host 'This script was written to assist in common PowerShell only Exchange-Online features.'
