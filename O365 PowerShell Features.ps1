@@ -62,7 +62,7 @@ function InboxRulesFunc {
 
 # Find Inactive Users Function
 function MailboxLastLoginFunc {
-	Get-EXOMailbox -ResultSize Unlimited | Foreach {Get-MailboxStatistics -Identity $_.UserPrincipalName | Select DisplayName, LastLogonTime} | Sort-Object LastLogonTime | Format-Table DisplayName, LastLogonTime -Auto
+	Get-EXOMailbox -ResultSize Unlimited | ForEach-Object {Get-MailboxStatistics -Identity $_.UserPrincipalName | Select DisplayName, LastLogonTime} | Sort-Object LastLogonTime | Format-Table DisplayName, LastLogonTime -Auto
 	}
 
 # Make Selection Function
