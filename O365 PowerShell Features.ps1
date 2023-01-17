@@ -1,5 +1,6 @@
 ﻿# Script for Common PowerShell-Only O365 Features
 # Log In
+# Patrick W.
 function loginfunc{
 Import-Module ExchangeOnlineManagement
 Write-Host 'This script was written to assist in common PowerShell only Exchange-Online features.'
@@ -25,6 +26,25 @@ function SharedCalendarFunc {
         Write-Host 'Notification Sent of Permission Granted'
         }
 
+# Modify Calendar Permissions
+function ModifyCalendarFunc {
+        $CalendarToShare = Read-Host -Prompt 'Enter the e-mail of the user who has the calendar you want to share'
+        $CalendarToShare = $CalendarToShare + ':\Calendar'
+        $CalendarSharedTo = Read-Host -Prompt 'Enter the e-mail of the user who needs access to the calendar'
+        $CalendarPermission = Read-Host -Prompt 'Enter 1 for Read-Only, and 2 for Read-Write'
+        if ($CalendarPermission -eq 1){
+            $CalendarPermission = 'Reviewer'
+            }
+        elseif ($CalendarPermission -eq 2){
+            $CalendarPermission = 'Editor'
+            }
+        Set-MailboxFolderPermission -Identity $CalendarToShare -User $CalendarSharedTo -AccessRights $CalendarPermission -SendNotificationToUser $true
+        Write-Host 'Permissions Modified'
+        Write-Output $CalendarSharedTo, "has", $CalendarPermission, "to", "$CalendarToShare", "Calendar"
+        Write-Output $CalendarPermission
+        Write-Output $CalendarToShare
+        }
+
 
 # Force Retention Policy Function
 function ForceRetentionPolicyFunc {
@@ -42,7 +62,7 @@ function InboxRulesFunc {
 
 # Find Inactive Users Function
 function MailboxLastLoginFunc {
-	Get-EXOMailbox -ResultSize Unlimited | ForEach-Object {Get-MailboxStatistics -Identity $_.UserPrincipalName | Select-Object DisplayName, LastLogonTime} | Sort-Object LastLogonTime | Format-Table DisplayName, LastLogonTime -Auto
+	Get-EXOMailbox -ResultSize Unlimited | Foreach {Get-MailboxStatistics -Identity $_.UserPrincipalName | Select DisplayName, LastLogonTime} | Sort-Object LastLogonTime | Format-Table DisplayName, LastLogonTime -Auto
 	}
 
 # Make Selection Function
@@ -51,6 +71,7 @@ Write-Host 'Calendar Share: Press 1'
 Write-Host 'Force Retention Policy: Press 2'
 Write-Host 'Check Inbox Rules: Press 3'
 Write-Host 'Check Last Login All Mailboxes in Org: Press 4 (This may take a couple of minutes)'
+Write-Host 'Modify existing Calendar Share Permissions: Press 5'
 
 $selection = Read-Host -Prompt 'Enter Selection'
 if ($selection -eq 1){
@@ -65,7 +86,10 @@ elseif ($selection -eq 3){
 elseif ($selection -eq 4){
     MailboxLastLoginFunc | Out-Host
     }
+elseif ($selection -eq 5){
+    ModifyCalendarFunc | Out-Host
     RepeatFunc
+    }
     }
 
 
