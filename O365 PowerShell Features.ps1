@@ -5,11 +5,33 @@
 function loginfunc{
 Import-Module ExchangeOnlineManagement
 Write-Host 'This script was written to assist in common PowerShell only Exchange-Online features.'
+$DelegatePermission = Read-Host -Prompt 'Do you need to access Exchange Online with delegated access? (y/n)'
 Write-Host 'After inputting credentials you will be presented options for features'
-Connect-ExchangeOnline
+exchangeconnect
 }
 
+# Delegated Access Function
+function delegateaccess{
+    Write-Host 'You have prompted for Delegated Access'
+    $DelegDomain = Read-Host -prompt 'Enter domain you need to connect to'
+    Connect-ExchangeOnline -DelegatedOrganization $DelegDomain
+    }
+# Direct Access Function
+function regaccess{
+    Write-Host 'You have prompted for Direct Access'
+    Connect-ExchangeOnline
+    }
 
+# Connect Function
+function exchangeconnect{
+    if ($DelegatePermission -eq 'y'){
+        Write-Host 
+        delegateaccess
+        }
+    elseif ($DelegatePermission -eq 'n'){
+        regaccess
+        }
+        }
 
 # Shared Calendar Function (and send notification upon completed sharing)
 function SharedCalendarFunc {
@@ -91,6 +113,12 @@ elseif ($selection -eq 5){
     ModifyCalendarFunc | Out-Host
     RepeatFunc
     }
+else{
+    Write-Host '~~~~~~~~~~~~~~~~~'
+    Write-Host 'Invalid Selection'
+    Write-Host '~~~~~~~~~~~~~~~~~'
+    MakeSelectionFunc
+    }
     }
 
 
@@ -106,4 +134,5 @@ function repeatfunc {
         }
 
     loginfunc
+    #exchangeconnect
     MakeSelectionFunc
