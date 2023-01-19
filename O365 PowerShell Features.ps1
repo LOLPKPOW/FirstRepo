@@ -1,7 +1,6 @@
 ﻿# Script for Common PowerShell-Only O365 Features
 # Log In
 # Patrick Woodward
-# Boring pointless addition for push request
 function loginfunc{
 Import-Module ExchangeOnlineManagement
 Write-Host 'This script was written to assist in common PowerShell only Exchange-Online features.'
@@ -121,7 +120,7 @@ else{
     }
     }
 
-
+# Repeat Function
 function repeatfunc {
     $repeat = Read-Host 'Would you like to make another selection? Y/N'
     if ($repeat -eq 'Y'){
@@ -133,6 +132,6 @@ function repeatfunc {
         }
         }
 
+# Run the script
     loginfunc
-    #exchangeconnect
     MakeSelectionFunc
