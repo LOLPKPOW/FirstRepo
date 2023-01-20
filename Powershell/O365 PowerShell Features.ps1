@@ -72,7 +72,7 @@ function ModifyCalendarFunc {
 function ForceRetentionPolicyFunc {
         $MailboxForPolicyForce = Read-Host -Prompt 'Enter email of the mailbox to force the retention policy'
         Start-ManagedFolderAssistant -Identity $MailboxForPolicyForce
-	Write-Host 'Force Retention Policy Complete'
+	    Write-Host 'Force Retention Policy Complete'
         }
 
 
@@ -87,6 +87,21 @@ function MailboxLastLoginFunc {
 	Get-EXOMailbox -ResultSize Unlimited | ForEach-Object {Get-MailboxStatistics -Identity $_.UserPrincipalName | Select DisplayName, LastLogonTime} | Sort-Object LastLogonTime | Format-Table DisplayName, LastLogonTime -Auto
 	}
 
+# Set Autoreply for user
+function SetAutoReply {
+    $AutoReplyBox = Read-Host -Prompt 'Enter the email of the user to set auto reply for.'
+    $StartDate = Read-Host -Prompt 'Enter Start Date (XX/XX/XXXX)'
+    $StartTime = Read-Host -Prompt 'Enter Start Time (XX:XX:XX)'
+    $ReplyBegins = '"' + $StartDate + ' ' + $StartTime + '"'
+    $EndDate = Read-Host -Prompt 'Enter End Date (XX/XX/XXXX)'
+    $EndTime = Read-Host -Prompt 'Enter End Time (XX:XX:XX)'
+    $ReplyEnds = '"' + $EndDate + ' ' + $EndTime + '"'
+    $InternalMessage = Read-Host -Prompt 'Enter internally distributed OOO message'
+    $InternalMessage = '"' + $InternalMessage + '"'
+    $ExternalMessage = Read-Host -Prompt 'Enter externally distributed OOO message'
+    $ExternalMMessage = '"' + $ExternalMessage + '"'
+    Set-MailboxAutoReplyConfiguration -Identity $AutoReplyBox -AutoReplyState Scheduled -StartTime $ReplyBegins -EndTime $ReplyEnds -InternalMessage $InternalMessage -ExternalMessage $ExternalMessage
+
 # Make Selection Function
 function MakeSelectionFunc {
 Write-Host 'Calendar Share: Press 1'
@@ -94,22 +109,31 @@ Write-Host 'Force Retention Policy: Press 2'
 Write-Host 'Check Inbox Rules: Press 3'
 Write-Host 'Check Last Login All Mailboxes in Org: Press 4 (This may take a couple of minutes)'
 Write-Host 'Modify existing Calendar Share Permissions: Press 5'
+Write-Host 'Set Auto Reply schedule for specific mailbox: Press 6'
 
 $selection = Read-Host -Prompt 'Enter Selection'
 if ($selection -eq 1){
     SharedCalendarFunc | Out-Host
+    RepeatFunc
     }
 elseif ($selection -eq 2){
     ForceRetentionPolicyFunc | Out-Host
+    RepeatFunc
     }
 elseif ($selection -eq 3){
     InboxRulesFunc | Out-Host
+    RepeatFunc
     }
 elseif ($selection -eq 4){
     MailboxLastLoginFunc | Out-Host
+    RepeatFunc
     }
 elseif ($selection -eq 5){
     ModifyCalendarFunc | Out-Host
+    RepeatFunc
+    }
+elseif ($selection -eq 6_{
+    SetAutoReply | Out-Host
     RepeatFunc
     }
 else{
