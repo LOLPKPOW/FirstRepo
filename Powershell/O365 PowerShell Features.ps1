@@ -101,6 +101,7 @@ function SetAutoReply {
     $ExternalMessage = Read-Host -Prompt 'Enter externally distributed OOO message'
     $ExternalMMessage = '"' + $ExternalMessage + '"'
     Set-MailboxAutoReplyConfiguration -Identity $AutoReplyBox -AutoReplyState Scheduled -StartTime $ReplyBegins -EndTime $ReplyEnds -InternalMessage $InternalMessage -ExternalMessage $ExternalMessage
+    }
 
 # Make Selection Function
 function MakeSelectionFunc {
@@ -132,7 +133,7 @@ elseif ($selection -eq 5){
     ModifyCalendarFunc | Out-Host
     RepeatFunc
     }
-elseif ($selection -eq 6_{
+elseif ($selection -eq 6){
     SetAutoReply | Out-Host
     RepeatFunc
     }
