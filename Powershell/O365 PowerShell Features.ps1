@@ -84,7 +84,7 @@ function InboxRulesFunc {
 
 # Find Inactive Users Function
 function MailboxLastLoginFunc {
-	Get-EXOMailbox -ResultSize Unlimited | ForEach-Object {Get-MailboxStatistics -Identity $_.UserPrincipalName | Select DisplayName, LastLogonTime} | Sort-Object LastLogonTime | Format-Table DisplayName, LastLogonTime -Auto
+	Get-EXOMailbox -ResultSize Unlimited | ForEach-Object {Get-MailboxStatistics -Identity $_.UserPrincipalName | Select-Object DisplayName, LastLogonTime} | Sort-Object LastLogonTime | Format-Table DisplayName, LastLogonTime -Auto
 	}
 
 # Set Autoreply for user
@@ -99,7 +99,7 @@ function SetAutoReply {
     $InternalMessage = Read-Host -Prompt 'Enter internally distributed OOO message'
     $InternalMessage = '"' + $InternalMessage + '"'
     $ExternalMessage = Read-Host -Prompt 'Enter externally distributed OOO message'
-    $ExternalMMessage = '"' + $ExternalMessage + '"'
+    $ExternalMessage = '"' + $ExternalMessage + '"'
     Set-MailboxAutoReplyConfiguration -Identity $AutoReplyBox -AutoReplyState Scheduled -StartTime $ReplyBegins -EndTime $ReplyEnds -InternalMessage $InternalMessage -ExternalMessage $ExternalMessage
     }
 
