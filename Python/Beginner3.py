@@ -1,4 +1,4 @@
-user_prompt = "Type add to add, show to show, or exit to exit: "
+user_prompt = "Type add, show, edit or exit: "
 user_list = []
 x =1 
 
@@ -12,6 +12,9 @@ while True:
         case "show" | "display":
             for item in user_list:
                 print(item.title())
+        case "edit":
+            number = (int(input("Which # entry would you like to edit? ")) - 1)
+            user_list[number] = input("Enter new entry: ")
         case "exit":
             print("Thanks for using my program.")
             break
