@@ -1,26 +1,53 @@
-# Remote signed permission
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+﻿# Comment to remember Remote Execution Policy
+# Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+
+# Function to find Tenant ID
+function GetCustID{
+ $domain = Read-Host -prompt "Type part of the organizations name"
+ $tenantid = (Get-MsolPartnerContract -DomainName $domain | Select-Object TenantId | Format-Table -hidetableheaders | Out-String).trim()
+ Write-Host "Customer",$domain,"'s Tenant ID is", $tenantid
+ }
+
+
+#Connect to MSOnline with or without Delegated Access
+function msolconnect{
+    $DelegatePermission = Read-Host -prompt "Do you require Delegated Access? (y/n)"
+    if ($DelegatePermission -eq 'y'){
+        Write-Host "You have prompted for Delegated Access"
+        Write-Host "Enter parent credentials"
+        Connect-MsolService
+        Write-Host "Attempting to find tenant ID for delagted access"
+        GetCustID
+        GetMFA
+    }
+    elseif ($DelegatePermission -eq 'n'){
+        Write-Host "You have prompted for Direct Access"
+        Write-Host "Enter Credentials"
+        Connect-Msolservice
+        GetMFA
+    }
+    }
+# Get MFA Function
+function GetMFA{
 Write-Host "Finding Azure Active Directory Accounts..."
-# Login
 $Users = Get-MsolUser -All | Where-Object { $_.UserType -ne "Guest" }
-# Create output file
-$Report = [System.Collections.Generic.List[Object]]::new() 
+$Report = [System.Collections.Generic.List[Object]]::new() # Create output file
 Write-Host "Processing" $Users.Count "accounts..." 
-# Go through every user
 ForEach ($User in $Users) {
 
     $MFADefaultMethod = ($User.StrongAuthenticationMethods | Where-Object { $_.IsDefault -eq "True" }).MethodType
     $MFAPhoneNumber = $User.StrongAuthenticationUserDetails.PhoneNumber
     $PrimarySMTP = $User.ProxyAddresses | Where-Object { $_ -clike "SMTP*" } | ForEach-Object { $_ -replace "SMTP:", "" }
     $Aliases = $User.ProxyAddresses | Where-Object { $_ -clike "smtp*" } | ForEach-Object { $_ -replace "smtp:", "" }
-# Disable/Enabled function write
+
     If ($User.StrongAuthenticationRequirements) {
         $MFAState = $User.StrongAuthenticationRequirements.State
     }
     Else {
         $MFAState = 'Disabled'
     }
-# Type of MFA function write
+
     If ($MFADefaultMethod) {
         Switch ($MFADefaultMethod) {
             "OneWaySMS" { $MFADefaultMethod = "Text code authentication phone" }
@@ -33,7 +60,7 @@ ForEach ($User in $Users) {
     Else {
         $MFADefaultMethod = "Not enabled"
     }
-# Grid form presentation  
+  
     $ReportLine = [PSCustomObject] @{
         UserPrincipalName = $User.UserPrincipalName
         DisplayName       = $User.DisplayName
@@ -46,7 +73,18 @@ ForEach ($User in $Users) {
                  
     $Report.Add($ReportLine)
 }
+Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+Write-Host " "
+Write-Host "Report is in c:\temp\MFAUsers.csv"
+Write-Host " "
+Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
+$Report | Select-Object UserPrincipalName, DisplayName, MFAState, MFADefaultMethod, MFAPhoneNumber, PrimarySMTP, Aliases | Sort-Object UserPrincipalName | Out-GridView
+$Report | Sort-Object UserPrincipalName | Export-CSV -Encoding UTF8 -NoTypeInformation c:\temp\MFAUsers.csv
+    }
+#DelegateAccess
+msolconnect
+#GetMFA
 Write-Host "Report is in c:\temp\MFAUsers.csv"
 $Report | Select-Object UserPrincipalName, DisplayName, MFAState, MFADefaultMethod, MFAPhoneNumber, PrimarySMTP, Aliases | Sort-Object UserPrincipalName | Out-GridView
 $Report | Sort-Object UserPrincipalName | Export-CSV -Encoding UTF8 -NoTypeInformation c:\temp\MFAUsers.csv
