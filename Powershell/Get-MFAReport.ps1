@@ -34,18 +34,18 @@ ForEach ($User in $Users) {
         $MFADefaultMethod = "Not enabled"
     }
 # Grid form presentation  
-#    $ReportLine = [PSCustomObject] @{
-#        UserPrincipalName = $User.UserPrincipalName
-#        DisplayName       = $User.DisplayName
-#        MFAState          = $MFAState
-#        MFADefaultMethod  = $MFADefaultMethod
-#        MFAPhoneNumber    = $MFAPhoneNumber
-#        PrimarySMTP       = ($PrimarySMTP -join ',')
-#        Aliases           = ($Aliases -join ',')
-#    }
-#                 
-#    $Report.Add($ReportLine)
-#}
+    $ReportLine = [PSCustomObject] @{
+        UserPrincipalName = $User.UserPrincipalName
+        DisplayName       = $User.DisplayName
+        MFAState          = $MFAState
+        MFADefaultMethod  = $MFADefaultMethod
+        MFAPhoneNumber    = $MFAPhoneNumber
+        PrimarySMTP       = ($PrimarySMTP -join ',')
+        Aliases           = ($Aliases -join ',')
+    }
+                 
+    $Report.Add($ReportLine)
+}
 
 Write-Host "Report is in c:\temp\MFAUsers.csv"
 $Report | Select-Object UserPrincipalName, DisplayName, MFAState, MFADefaultMethod, MFAPhoneNumber, PrimarySMTP, Aliases | Sort-Object UserPrincipalName | Out-GridView
