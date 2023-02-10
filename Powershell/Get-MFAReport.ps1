@@ -4,8 +4,8 @@
 
 # Function to find Tenant ID
 function GetCustID{
- $domain = Read-Host -prompt "Type the domain name"
- $tenantid = (Get-MsolPartnerContract -DomainName $domain | Select-Object TenantId | Format-Table -hidetableheaders | Out-String).trim()
+ $global:domain = Read-Host -prompt "Type the domain name"
+ $global:tenantid = (Get-MsolPartnerContract -DomainName $domain | Select-Object TenantId | Format-Table -hidetableheaders | Out-String).trim()
  Write-Host "Customer",$domain,"'s Tenant ID is", $tenantid
  }
 
@@ -63,7 +63,7 @@ function getcustomerid{
 # Get MFA Function
 function GetMFA{
 Write-Host "Finding Azure Active Directory Accounts..."
-$Users = Get-MsolUser -tenantid $tenantid | Where-Object { $_.UserType -ne "Guest" }
+$Users = Get-MsolUser -tenantid $tenantid -all | Where-Object { $_.UserType -ne "Guest" }
 $Report = [System.Collections.Generic.List[Object]]::new() # Create output file
 Write-Host "Processing" $Users.Count "accounts..." 
 ForEach ($User in $Users) {
