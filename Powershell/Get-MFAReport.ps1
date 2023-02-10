@@ -1,5 +1,8 @@
-﻿# Comment to remember Remote Execution Policy
-# Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+﻿# Request Elevation
+Start-Process Powershell -Verb runAs
+
+# Comment to remember Remote Execution Policy
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 
 # Function to find Tenant ID
@@ -10,7 +13,7 @@ function GetCustID{
  }
 
 
-#Connect to MSOnline with or without Delegated Access
+# Connect to MSOnline with or without Delegated Access
 function msolconnect{
     $DelegatePermission = Read-Host -prompt "Do you require Delegated Access? (y/n)"
     if ($DelegatePermission -eq 'y'){
@@ -29,7 +32,7 @@ function msolconnect{
         GetMFA
     }
     }
-
+# Function to extract TenantID info from Domain Name
 function getcustomerid{
  
     $name = $domain
