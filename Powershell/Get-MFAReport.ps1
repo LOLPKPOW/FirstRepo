@@ -1,7 +1,4 @@
-﻿# Request Elevation
-Start-Process Powershell -Verb runAs
-
-# Comment to remember Remote Execution Policy
+﻿# Comment to remember Remote Execution Policy
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 
@@ -37,52 +34,44 @@ function getcustomerid{
  
     $name = $domain
     $Customers = @()
-    $Customers = @(Get-MsolPartnerContract | Where-Object {$_.Name -match $name})
-     
-    if($Customers.Count -gt 1){
-     
+    $Customers = @(Get-MsolPartnerContract | Where-Object {$_.Name -match $name})     
+    if($Customers.Count -gt 1){     
         Write-Host "More than 1 customer found, rerun the function:"
-        Write-Host " "
-     
+        Write-Host " "     
         ForEach($Customer in $Customers){
-     
             Write-Host $Customer.Name
             }
         }
      
-    elseif($Customers.count -eq 0){
-         
+    elseif($Customers.count -eq 0){ 
         Write-Host "No customers found, rerun the function"
         }
      
-    elseif($Customers.Count -eq 1){
-     
+    elseif($Customers.Count -eq 1){    
         $global:cid = $Customers.tenantid
         $tenantid = $global:cid 
         Write-Host "$($Customers.name) selected. User the -tenantid `$cid parameter to run MSOL commands for this customer."
         }
      
     }
+
 # Get MFA Function
 function GetMFA{
 Write-Host "Finding Azure Active Directory Accounts..."
-$Users = Get-MsolUser -tenantid $tenantid -all | Where-Object { $_.UserType -ne "Guest" }
-$Report = [System.Collections.Generic.List[Object]]::new() # Create output file
+$global:Users = Get-MsolUser -tenantid $tenantid -all | Where-Object { $_.UserType -ne "Guest" }
+$global:Report = [System.Collections.Generic.List[Object]]::new() # Create output file
 Write-Host "Processing" $Users.Count "accounts..." 
 ForEach ($User in $Users) {
-
     $MFADefaultMethod = ($User.StrongAuthenticationMethods | Where-Object { $_.IsDefault -eq "True" }).MethodType
     $MFAPhoneNumber = $User.StrongAuthenticationUserDetails.PhoneNumber
     $PrimarySMTP = $User.ProxyAddresses | Where-Object { $_ -clike "SMTP*" } | ForEach-Object { $_ -replace "SMTP:", "" }
     $Aliases = $User.ProxyAddresses | Where-Object { $_ -clike "smtp*" } | ForEach-Object { $_ -replace "smtp:", "" }
-
     If ($User.StrongAuthenticationRequirements) {
         $MFAState = $User.StrongAuthenticationRequirements.State
     }
     Else {
         $MFAState = 'Disabled'
     }
-
     If ($MFADefaultMethod) {
         Switch ($MFADefaultMethod) {
             "OneWaySMS" { $MFADefaultMethod = "Text code authentication phone" }
@@ -104,8 +93,7 @@ ForEach ($User in $Users) {
         MFAPhoneNumber    = $MFAPhoneNumber
         PrimarySMTP       = ($PrimarySMTP -join ',')
         Aliases           = ($Aliases -join ',')
-    }
-                 
+    }                 
     $Report.Add($ReportLine)
 }
 Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
