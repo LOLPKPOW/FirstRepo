@@ -4,7 +4,7 @@
 
 # Function to find Tenant ID
 function GetCustID{
- $domain = Read-Host -prompt "Type part of the organizations name"
+ $domain = Read-Host -prompt "Type the domain name"
  $tenantid = (Get-MsolPartnerContract -DomainName $domain | Select-Object TenantId | Format-Table -hidetableheaders | Out-String).trim()
  Write-Host "Customer",$domain,"'s Tenant ID is", $tenantid
  }
@@ -25,13 +25,45 @@ function msolconnect{
         Write-Host "You have prompted for Direct Access"
         Write-Host "Enter Credentials"
         Connect-Msolservice
+        Get-CustomerID
         GetMFA
     }
+    }
+
+function getcustomerid{
+ 
+    $name = $domain
+    $Customers = @()
+    $Customers = @(Get-MsolPartnerContract | Where-Object {$_.Name -match $name})
+     
+    if($Customers.Count -gt 1){
+     
+        Write-Host "More than 1 customer found, rerun the function:"
+        Write-Host " "
+     
+        ForEach($Customer in $Customers){
+     
+            Write-Host $Customer.Name
+            }
+        }
+     
+    elseif($Customers.count -eq 0){
+         
+        Write-Host "No customers found, rerun the function"
+        }
+     
+    elseif($Customers.Count -eq 1){
+     
+        $global:cid = $Customers.tenantid
+        $tenantid = $global:cid 
+        Write-Host "$($Customers.name) selected. User the -tenantid `$cid parameter to run MSOL commands for this customer."
+        }
+     
     }
 # Get MFA Function
 function GetMFA{
 Write-Host "Finding Azure Active Directory Accounts..."
-$Users = Get-MsolUser -All | Where-Object { $_.UserType -ne "Guest" }
+$Users = Get-MsolUser -tenantid $tenantid | Where-Object { $_.UserType -ne "Guest" }
 $Report = [System.Collections.Generic.List[Object]]::new() # Create output file
 Write-Host "Processing" $Users.Count "accounts..." 
 ForEach ($User in $Users) {
