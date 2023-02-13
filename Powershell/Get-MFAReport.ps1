@@ -2,9 +2,7 @@
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 # Choose report download directory and file name 
-$reportdir = Read-Host -prompt "Specify full path for directory to save file (i.e. 'C:\Windows\Temp\)"
-$reportname = Read-Host -prompt "Specify file name without extension (i.e. MFAReport)"
-$reportfile = $reportdir + $reportname + '.csv'
+
 
 # Function to find Tenant ID
 function GetCustID{
@@ -18,46 +16,30 @@ function GetCustID{
 function msolconnect{
     $DelegatePermission = Read-Host -prompt "Do you require Delegated Access? (y/n)"
     if ($DelegatePermission -eq 'y'){
+        $reportdir = Read-Host -prompt "Specify full path for directory to save file (i.e. 'C:\Windows\Temp\)"
+        $reportname = Read-Host -prompt "Specify file name without extension (i.e. MFAReport)"
+        $reportfile = $reportdir + $reportname + '.csv'
         Write-Host "You have prompted for Delegated Access"
         Write-Host "Enter parent credentials"
         Connect-MsolService
         Write-Host "Attempting to find tenant ID for delagted access"
         GetCustID
         GetMFA
+        WriteReport
+        DoItAgain
     }
     elseif ($DelegatePermission -eq 'n'){
+        $reportdir = Read-Host -prompt "Specify full path for directory to save file (i.e. 'C:\Windows\Temp\)"
+        $reportname = Read-Host -prompt "Specify file name without extension (i.e. MFAReport)"
+        $reportfile = $reportdir + $reportname + '.csv'
         Write-Host "You have prompted for Direct Access"
         Write-Host "Enter Credentials"
         Connect-Msolservice
         GetMFA
+        WriteReport
+        DoItAgain
     }
     }
-# Function to extract TenantID info from Domain Name
-# function getcustomerid{
-# 
-#    $name = $domain
-#    $Customers = @()
-#    $Customers = @(Get-MsolPartnerContract | Where-Object {$_.Name -match $name})     
-#    if($Customers.Count -gt 1){     
-#        Write-Host "More than 1 customer found, rerun the function:"
-#        Write-Host " "     
-#        ForEach($Customer in $Customers){
-#            Write-Host $Customer.Name
-#            }
-#        }
-#     
-#    elseif($Customers.count -eq 0){ 
-#        Write-Host "No customers found, rerun the function"
-#        }
-#     
-#    elseif($Customers.Count -eq 1){    
-#        $global:cid = $Customers.tenantid
-#        $tenantid = $global:cid 
-#        Write-Host "$($Customers.name) selected. User the -tenantid `$cid parameter to run MSOL commands for this customer."
-#        }
-#     
-#    }
-
 # Get MFA Function
 function GetMFA{
 Write-Host "Finding Azure Active Directory Accounts..."
@@ -99,13 +81,49 @@ ForEach ($User in $Users) {
     }                 
     $Report.Add($ReportLine)
 }
-Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-Write-Host " "
-Write-Host "Report is in", $reportdir
-Write-Host " "
-Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+# Report writing function
+function WriteReport{
+    $Report | Select-Object UserPrincipalName, DisplayName, MFAState, MFADefaultMethod, MFAPhoneNumber, PrimarySMTP, Aliases | Sort-Object UserPrincipalName | Out-GridView
+
+    $Report | Sort-Object UserPrincipalName | Export-CSV -Encoding UTF8 -NoTypeInformation $reportfile
+
+    Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    Write-Host " "
+    Write-Host "Report is in", $reportdir
+    Write-Host " "
+    Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+}
+    }
+function DoItAgain{
+    $AnotherRound = Read-Host -prompt "Would you like to make another report? (y/n)"
+    if ($AnotherRound -eq "y"){
+        $DelegatePermission2 = Read-Host -prompt "Is this for another delegate permission required client? (y/n)"
+        if ($DelegatePermission2 -eq "y"){
+            if ($tenantid -ne $null){
+            Connect-MsolService
+            Write-Host "Attempting to find tenant ID for delagted access"
+            GetCustID
+            GetMFA
+            WriteReport
+        }
+            elseif ($tenantid -eq $null){
+                msolconnect
+            }
+    }
+        elseif ($DelegatePermission2 -eq "n"){
+            msolconnect
+        }
+        else{
+            Write-Host "Invalid Entry. Try again."
+            DoItAgain
+        } 
+    }
+    elseif ($AnotherRound -eq "n"){
+        Write-Host "Thanks for using my MFA audit script"
+    }
+    else{
+        Write-Host "Invalid Entry"
+        DoItAgain
+    }
     }
 msolconnect
-$Report | Select-Object UserPrincipalName, DisplayName, MFAState, MFADefaultMethod, MFAPhoneNumber, PrimarySMTP, Aliases | Sort-Object UserPrincipalName | Out-GridView
-
-$Report | Sort-Object UserPrincipalName | Export-CSV -Encoding UTF8 -NoTypeInformation $reportfile
