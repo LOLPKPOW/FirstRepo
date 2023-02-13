@@ -1,4 +1,4 @@
 "# FirstRepo" 
-This is just my "figuring out GitHub" project.
-Trying to get familiar with push/pull/commit.
-Next step is figuring out branches.
+Powershell has some functional stuff in it, relating to O365.
+
+The remaining folders have nothing of value other than my practice. :)
