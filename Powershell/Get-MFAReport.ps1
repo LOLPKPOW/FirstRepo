@@ -1,9 +1,6 @@
 ﻿# Comment to remember Remote Execution Policy
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
-# Choose report download directory and file name 
-
-
 # Function to find Tenant ID
 function GetCustID{
  $global:domain = Read-Host -prompt "Type the domain name"
@@ -27,6 +24,8 @@ function msolconnect{
         GetMFA
         WriteReport
         DoItAgain
+        $global:tenantid = $null
+        $global:domain = $null
     }
     elseif ($DelegatePermission -eq 'n'){
         $reportdir = Read-Host -prompt "Specify full path for directory to save file (i.e. 'C:\Windows\Temp\)"
@@ -38,6 +37,8 @@ function msolconnect{
         GetMFA
         WriteReport
         DoItAgain
+        $global:tenantid = $null
+        $global:domain = $null
     }
     }
 # Get MFA Function
@@ -46,6 +47,7 @@ Write-Host "Finding Azure Active Directory Accounts..."
 $global:Users = Get-MsolUser -tenantid $tenantid -all | Where-Object { $_.UserType -ne "Guest" }
 $global:Report = [System.Collections.Generic.List[Object]]::new() # Create output file
 Write-Host "Processing" $Users.Count "accounts..." 
+    # Get info for report
 ForEach ($User in $Users) {
     $MFADefaultMethod = ($User.StrongAuthenticationMethods | Where-Object { $_.IsDefault -eq "True" }).MethodType
     $MFAPhoneNumber = $User.StrongAuthenticationUserDetails.PhoneNumber
@@ -80,7 +82,7 @@ ForEach ($User in $Users) {
         Aliases           = ($Aliases -join ',')
     }                 
     $Report.Add($ReportLine)
-}
+}}
 # Report writing function
 function WriteReport{
     $Report | Select-Object UserPrincipalName, DisplayName, MFAState, MFADefaultMethod, MFAPhoneNumber, PrimarySMTP, Aliases | Sort-Object UserPrincipalName | Out-GridView
@@ -92,8 +94,8 @@ function WriteReport{
     Write-Host "Report is in", $reportdir
     Write-Host " "
     Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-}
     }
+    
 function DoItAgain{
     $AnotherRound = Read-Host -prompt "Would you like to make another report? (y/n)"
     if ($AnotherRound -eq "y"){
@@ -126,4 +128,5 @@ function DoItAgain{
         DoItAgain
     }
     }
+
 msolconnect
