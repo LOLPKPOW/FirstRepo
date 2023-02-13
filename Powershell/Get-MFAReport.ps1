@@ -1,6 +1,10 @@
 ﻿# Comment to remember Remote Execution Policy
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
+# Choose report download directory and file name 
+$reportdir = Read-Host -prompt "Specify full path for directory to save file (i.e. 'C:\Windows\Temp\)"
+$reportname = Read-Host -prompt "Specify file name without extension (i.e. MFAReport)"
+$reportfile = $reportdir + $reportname + '.csv'
 
 # Function to find Tenant ID
 function GetCustID{
@@ -25,35 +29,34 @@ function msolconnect{
         Write-Host "You have prompted for Direct Access"
         Write-Host "Enter Credentials"
         Connect-Msolservice
-        Get-CustomerID
         GetMFA
     }
     }
 # Function to extract TenantID info from Domain Name
-function getcustomerid{
- 
-    $name = $domain
-    $Customers = @()
-    $Customers = @(Get-MsolPartnerContract | Where-Object {$_.Name -match $name})     
-    if($Customers.Count -gt 1){     
-        Write-Host "More than 1 customer found, rerun the function:"
-        Write-Host " "     
-        ForEach($Customer in $Customers){
-            Write-Host $Customer.Name
-            }
-        }
-     
-    elseif($Customers.count -eq 0){ 
-        Write-Host "No customers found, rerun the function"
-        }
-     
-    elseif($Customers.Count -eq 1){    
-        $global:cid = $Customers.tenantid
-        $tenantid = $global:cid 
-        Write-Host "$($Customers.name) selected. User the -tenantid `$cid parameter to run MSOL commands for this customer."
-        }
-     
-    }
+# function getcustomerid{
+# 
+#    $name = $domain
+#    $Customers = @()
+#    $Customers = @(Get-MsolPartnerContract | Where-Object {$_.Name -match $name})     
+#    if($Customers.Count -gt 1){     
+#        Write-Host "More than 1 customer found, rerun the function:"
+#        Write-Host " "     
+#        ForEach($Customer in $Customers){
+#            Write-Host $Customer.Name
+#            }
+#        }
+#     
+#    elseif($Customers.count -eq 0){ 
+#        Write-Host "No customers found, rerun the function"
+#        }
+#     
+#    elseif($Customers.Count -eq 1){    
+#        $global:cid = $Customers.tenantid
+#        $tenantid = $global:cid 
+#        Write-Host "$($Customers.name) selected. User the -tenantid `$cid parameter to run MSOL commands for this customer."
+#        }
+#     
+#    }
 
 # Get MFA Function
 function GetMFA{
@@ -98,16 +101,11 @@ ForEach ($User in $Users) {
 }
 Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 Write-Host " "
-Write-Host "Report is in c:\temp\MFAUsers.csv"
+Write-Host "Report is in", $reportdir
 Write-Host " "
 Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-$Report | Select-Object UserPrincipalName, DisplayName, MFAState, MFADefaultMethod, MFAPhoneNumber, PrimarySMTP, Aliases | Sort-Object UserPrincipalName | Out-GridView
-$Report | Sort-Object UserPrincipalName | Export-CSV -Encoding UTF8 -NoTypeInformation c:\temp\MFAUsers.csv
     }
-#DelegateAccess
 msolconnect
-#GetMFA
-Write-Host "Report is in c:\temp\MFAUsers.csv"
 $Report | Select-Object UserPrincipalName, DisplayName, MFAState, MFADefaultMethod, MFAPhoneNumber, PrimarySMTP, Aliases | Sort-Object UserPrincipalName | Out-GridView
-$Report | Sort-Object UserPrincipalName | Export-CSV -Encoding UTF8 -NoTypeInformation c:\temp\MFAUsers.csv
+
+$Report | Sort-Object UserPrincipalName | Export-CSV -Encoding UTF8 -NoTypeInformation $reportfile
