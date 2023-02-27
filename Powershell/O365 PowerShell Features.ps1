@@ -78,8 +78,8 @@ function ForceRetentionPolicyFunc {
 
 # Check Inbox Rules Function
 function InboxRulesFunc {
-        $MailboxForInboxRules = Read-Host -Prompt 'Enter email of the mailbox to check for inbox rules'
-        Get-InboxRule -Mailbox $MailboxForInboxRules
+    $MailboxForInboxRules = Read-Host -Prompt 'Enter email of the mailbox to check for inbox rules'
+    Get-InboxRule -Mailbox $MailboxForInboxRules
         }
 
 # Find Inactive Users Function
@@ -105,14 +105,14 @@ function SetAutoReply {
 
 # Make Selection Function
 function MakeSelectionFunc {
-Write-Host 'Calendar Share: Press 1'
-Write-Host 'Force Retention Policy: Press 2'
-Write-Host 'Check Inbox Rules: Press 3'
-Write-Host 'Check Last Login All Mailboxes in Org: Press 4 (This may take a couple of minutes)'
-Write-Host 'Modify existing Calendar Share Permissions: Press 5'
-Write-Host 'Set Auto Reply schedule for specific mailbox: Press 6'
-
-$selection = Read-Host -Prompt 'Enter Selection'
+    Write-Host 'Calendar Share: Press 1'
+    Write-Host 'Force Retention Policy: Press 2'
+    Write-Host 'Check Inbox Rules: Press 3'
+    Write-Host 'Check Last Login All Mailboxes in Org: Press 4 (This may take a couple of minutes)'
+    Write-Host 'Modify existing Calendar Share Permissions: Press 5'
+    Write-Host 'Set Auto Reply schedule for specific mailbox: Press 6'
+    Write-Host 'Cancel Organized Meetings: Press 7'
+    $selection = Read-Host -Prompt 'Enter Selection'
 if ($selection -eq 1){
     SharedCalendarFunc | Out-Host
     RepeatFunc
@@ -137,6 +137,9 @@ elseif ($selection -eq 6){
     SetAutoReply | Out-Host
     RepeatFunc
     }
+elseif ($selection -eq 7){
+    CancelOrganizedMeetings | Out-Host
+    RepeatFunc
 else{
     Write-Host '~~~~~~~~~~~~~~~~~'
     Write-Host 'Invalid Selection'
@@ -144,6 +147,31 @@ else{
     MakeSelectionFunc
     }
     }
+    }
+    
+
+
+# Cancel recurring calendar appointments\Organized Meetin
+function CancelOrganizedMeetings {
+    $UserIdentity = Read-Host "Enter the Display name of the user who organized the meetings: "
+    Write-Host "Displaying preview of currently created meetings"
+    $RemovedCalendarEvents = Remove-CalendarEvents -Identity $UserIdentity -CancelOrganizedMeetings -PreviewOnly
+    if ($RemovedCalendarEvents.length -lt 1){
+        $OrganizedMeetings = 'There are no organized meetings under this user.'
+        Write-Host " "
+        MakeSelectionFunc
+        }
+    Write-Host $OrganizedMeetings
+    $OrganizedMeetingsYesNo = Read-Host "Would you like to continue with deletion? (y/n)"
+    if ($OrganizedMeetingsYesNo -eq 'yes'){
+        Remove-CalendarEvents -Identity $UserIdentity -CancelOrganizedMeetings
+        Write-Host $RemovedCalendarEvents, 'has been deleted.'
+        }
+    elseif ($OrganizedMeetings -eq 'no'){
+        Write-Host "Cancelling deletion"
+        }
+        }
+
 
 # Repeat Function
 function repeatfunc {
