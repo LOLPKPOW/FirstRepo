@@ -1,5 +1,5 @@
 ﻿# Script for Common PowerShell-Only O365 Features
-# Log In 
+# Log In  
 # Patrick Woodward
 function loginfunc{
 Import-Module ExchangeOnlineManagement
