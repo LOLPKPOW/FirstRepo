@@ -48,6 +48,14 @@ function SharedCalendarFunc {
         Write-Host 'Notification Sent of Permission Granted'
         }
 
+# Remove Calendar Permissions
+function RemoveCalendarFunc {
+        $CalendarToShare = Read-Host -Prompt 'Enter the e-mail of the user who has the calendar you want to remove permissions from'
+        $CalendarToShare = $CalendarToShare + ':\Calendar'
+        $CalendarSharedTo = Read-Host -Prompt 'Enter the e-mail of the user who needs permissions removed'
+        Remove-MailboxFolderPermission -Identity $CalendarToShare -User $CalendarSharedTo
+        Write-Host $CalendarSharedTo, 'has had permissions removed from the calendar of', $CalendarToShare
+        }
 # Modify Calendar Permissions
 function ModifyCalendarFunc {
         $CalendarToShare = Read-Host -Prompt 'Enter the e-mail of the user who has the calendar you want to share'
@@ -111,6 +119,7 @@ Write-Host 'Check Inbox Rules: Press 3'
 Write-Host 'Check Last Login All Mailboxes in Org: Press 4 (This may take a couple of minutes)'
 Write-Host 'Modify existing Calendar Share Permissions: Press 5'
 Write-Host 'Set Auto Reply schedule for specific mailbox: Press 6'
+Write-Host 'Remove Calendar Permissions: Press 7'
 
 $selection = Read-Host -Prompt 'Enter Selection'
 if ($selection -eq 1){
@@ -137,6 +146,10 @@ elseif ($selection -eq 6){
     SetAutoReply | Out-Host
     RepeatFunc
     }
+elseif ($selection -eq 7){
+    RemoveCalendarFunc | Out-Host
+    RepeatFunc
+}
 else{
     Write-Host '~~~~~~~~~~~~~~~~~'
     Write-Host 'Invalid Selection'
