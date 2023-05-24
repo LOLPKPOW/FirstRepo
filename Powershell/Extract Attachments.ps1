@@ -21,20 +21,20 @@ $f.Items| foreach {
     $a = $_.filename
     $name = $a
     If ($a.Contains("xlsx")) {
-    $_.saveasfile((Join-Path $filepath "$name.xlsx"))
+    $_.saveasfile((Join-Path $filepath "$name"))
    }
     Elseif ($a.Contains("doc")) {
-    $_.saveasfile((Join-Path $filepath "$name.doc"))
+    $_.saveasfile((Join-Path $filepath "$name"))
     }
     Elseif ($a.Contains("docx")) {
-    $_.saveasfile((Join-Path $filepath "$name.docx"))
+    $_.saveasfile((Join-Path $filepath "$name"))
     }
     Elseif ($a.Contains("pdf")) {
-    $_.saveasfile((Join-Path $filepath "$name.pdf"))
+    $_.saveasfile((Join-Path $filepath "$name"))
     }
   }
 }
 # Change to chosen folder
 cd $dir
 # Export
-Dir | Export-CSV C:\temp\GJertberg\Attachments.CSV
+Dir | Export-CSV $dir\Attachments.CSV
