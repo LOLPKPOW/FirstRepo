@@ -110,6 +110,11 @@ function SetAutoReply {
     $ExternalMessage = '"' + $ExternalMessage + '"'
     Set-MailboxAutoReplyConfiguration -Identity $AutoReplyBox -AutoReplyState Scheduled -StartTime $ReplyBegins -EndTime $ReplyEnds -InternalMessage $InternalMessage -ExternalMessage $ExternalMessage
     }
+# View current Calendar Permissions
+function GetCalendarPermiss {
+    $UserName = Read-Host -Prompt "Enter the email of who's permissions you'd like to query."
+    $UserName = $UserName + ":\Calendar"
+    Get-MailboxPermission -Identity $Username
 
 # Make Selection Function
 function MakeSelectionFunc {
