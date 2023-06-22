@@ -1,4 +1,5 @@
-﻿# Script for Common PowerShell-Only O365 Features
+﻿#
+# Script for Common PowerShell-Only O365 Features
 # Log In 
 # Patrick Woodward
 function loginfunc{
