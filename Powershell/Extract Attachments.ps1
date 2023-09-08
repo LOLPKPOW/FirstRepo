@@ -6,7 +6,7 @@ Write-Host "This will extract .xlsx, .doc, .docx, and .pdf files to a folder"
 Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 # Set the mailbox and folder name
-$mailboxName = "pwoodward@pcatechsolutions.com"
+$mailboxName = Read-Host -prompt "Enter name of Mailbox you want to extract from"
 $folderName = "Inbox"
 
 # Create an instance of Outlook Application
