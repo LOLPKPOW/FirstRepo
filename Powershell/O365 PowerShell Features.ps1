@@ -112,6 +112,32 @@ function SetAutoReply {
     Set-MailboxAutoReplyConfiguration -Identity $AutoReplyBox -AutoReplyState Scheduled -StartTime $ReplyBegins -EndTime $ReplyEnds -InternalMessage $InternalMessage -ExternalMessage $ExternalMessage
     }
 
+# Export all groups and their members
+function ExportGroups {
+# Select file path to save the file
+    $ExportGroupsPath = Read-Host -prompt "Enter path to save the file, including the trailing '\'"
+    #Select file name for the file, without the .csv
+    $ExportGroupsFileName = Read-Host -prompt "Enter the file name to save the report as (don't include .csv)"
+# Get all groups (both distribution and 365 groups)
+    $groups = Get-UnifiedGroup -ResultSize Unlimited
+
+    # Create an empty array to store group information
+    $groupInfo = @()
+
+    foreach ($group in $groups) {
+        $groupMembers = Get-UnifiedGroupLinks -Identity $group.Identity -LinkType Members
+        $members = $groupMembers | Select-Object DisplayName, PrimarySmtpAddress    
+        $groupInfo += [PSCustomObject]@{
+            "GroupName" = $group.DisplayName
+            "Members" = $members.DisplayName -join ", "
+            "Emails" = $members.PrimarySmtpAddress -join ", "
+            "Owners" = ($group | Select-Object -ExpandProperty ManagedBy) -join ", "
+        }
+    }
+
+# Export the data to a CSV file
+$groupInfo | Export-Csv -Path ($ExportGroupsPath + $ExportGroupsFileName + ".csv") -NoTypeInformation
+}
 # Make Selection Function
 function MakeSelectionFunc {
 Write-Host 'Calendar Share: Press 1'
@@ -121,6 +147,7 @@ Write-Host 'Check Last Login All Mailboxes in Org: Press 4 (This may take a coup
 Write-Host 'Modify existing Calendar Share Permissions: Press 5'
 Write-Host 'Set Auto Reply schedule for specific mailbox: Press 6'
 Write-Host 'Remove Calendar Permissions: Press 7'
+Write-Host 'Export Groups and Membership List: Press 8'
 
 $selection = Read-Host -Prompt 'Enter Selection'
 if ($selection -eq 1){
@@ -151,6 +178,10 @@ elseif ($selection -eq 7){
     RemoveCalendarFunc | Out-Host
     RepeatFunc
 }
+elseif ($selection -eq 8){
+    ExportGroups | Out-Host
+    RepeatFunc
+    }
 else{
     Write-Host '~~~~~~~~~~~~~~~~~'
     Write-Host 'Invalid Selection'
