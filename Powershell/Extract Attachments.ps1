@@ -19,7 +19,7 @@ $mailbox = $outlook.Session.Folders | Where-Object { $_.Name -eq $mailboxName }
 $folder = $mailbox.Folders | Where-Object { $_.Name -eq $folderName }
 
 # Prompt where to write the file
-$dir = "C:\temp\pwoodward"
+$dir = Read-Host -prompt "Enter the directory you'd like to save the file"
 
 # Function to pull and write specific file extensions
 $filepath = $dir
