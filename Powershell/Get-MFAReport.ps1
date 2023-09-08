@@ -53,6 +53,8 @@ ForEach ($User in $Users) {
     $MFAPhoneNumber = $User.StrongAuthenticationUserDetails.PhoneNumber
     $PrimarySMTP = $User.ProxyAddresses | Where-Object { $_ -clike "SMTP*" } | ForEach-Object { $_ -replace "SMTP:", "" }
     $Aliases = $User.ProxyAddresses | Where-Object { $_ -clike "smtp*" } | ForEach-Object { $_ -replace "smtp:", "" }
+    $AssignedLicenses = $User.Licenses | ForEach-Object { $_.AccountSkuId }
+
     If ($User.StrongAuthenticationRequirements) {
         $MFAState = $User.StrongAuthenticationRequirements.State
     }
@@ -66,12 +68,16 @@ ForEach ($User in $Users) {
             "TwoWayVoiceOffice" { $MFADefaultMethod = "Call office phone" }
             "PhoneAppOTP" { $MFADefaultMethod = "Authenticator app or hardware token" }
             "PhoneAppNotification" { $MFADefaultMethod = "Microsoft authenticator app" }
+            
         }
     }
     Else {
         $MFADefaultMethod = "Not enabled"
     }
   
+    #$UserLicense = Get-MsolUser -UserPrincipalName $User.UserPrincipalName -All -LicenseReconciliationNeeded | Select-Object -ExpandProperty Licenses
+
+
     $ReportLine = [PSCustomObject] @{
         UserPrincipalName = $User.UserPrincipalName
         DisplayName       = $User.DisplayName
@@ -80,12 +86,13 @@ ForEach ($User in $Users) {
         MFAPhoneNumber    = $MFAPhoneNumber
         PrimarySMTP       = ($PrimarySMTP -join ',')
         Aliases           = ($Aliases -join ',')
+        LicenseApplied    = $AssignedLicenses
     }                 
     $Report.Add($ReportLine)
 }}
 # Report writing function
 function WriteReport{
-    $Report | Select-Object UserPrincipalName, DisplayName, MFAState, MFADefaultMethod, MFAPhoneNumber, PrimarySMTP, Aliases | Sort-Object UserPrincipalName | Out-GridView
+    $Report | Select-Object UserPrincipalName, DisplayName, MFAState, MFADefaultMethod, MFAPhoneNumber, PrimarySMTP, Aliases, LicenseApplied | Sort-Object UserPrincipalName | Out-GridView
 
     $Report | Sort-Object UserPrincipalName | Export-CSV -Encoding UTF8 -NoTypeInformation $reportfile
 
