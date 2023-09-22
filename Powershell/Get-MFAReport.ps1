@@ -41,6 +41,13 @@ function msolconnect{
         $global:domain = $null
     }
     }
+
+    # Custom mapping of SkuId to desired display names
+$LicenseMapping = @{
+    "O365_BUSINESS_ESSENTIALS" = "Microsoft Business Basic"
+    "O365_BUSINESS_PREMIUM"   = "Microsoft Business Standard"
+    # Add more mappings as needed
+}
 # Get MFA Function
 function GetMFA{
 Write-Host "Finding Azure Active Directory Accounts..."

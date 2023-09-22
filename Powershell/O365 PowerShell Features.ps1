@@ -138,6 +138,14 @@ function ExportGroups {
 # Export the data to a CSV file
 $groupInfo | Export-Csv -Path ($ExportGroupsPath + $ExportGroupsFileName + ".csv") -NoTypeInformation
 }
+
+# Set Week Start Day
+function SetWeekStartDayFunc {
+    $SetWeekUser = Read-Host -prompt "Enter email of user to set start day of the week"
+    $SetDayOfWeek = Read-Host -prompt "Enter day of week (i.e. Monday, Tuesday etc)"
+    Set-MailboxCalendarConfiguration -Identity $SetWeekUser -WeekStartDay $SetDayOfWeek
+    }
+
 # Make Selection Function
 function MakeSelectionFunc {
 Write-Host 'Calendar Share: Press 1'
@@ -148,6 +156,7 @@ Write-Host 'Modify existing Calendar Share Permissions: Press 5'
 Write-Host 'Set Auto Reply schedule for specific mailbox: Press 6'
 Write-Host 'Remove Calendar Permissions: Press 7'
 Write-Host 'Export Groups and Membership List: Press 8'
+Write-Host 'Set WeekStartDay per mailbox: Press 9'
 
 $selection = Read-Host -Prompt 'Enter Selection'
 if ($selection -eq 1){
@@ -182,13 +191,17 @@ elseif ($selection -eq 8){
     ExportGroups | Out-Host
     RepeatFunc
     }
+elseif ($Selection -eq 9){
+    SetWeekStartDayFunc | Out-Host
+    RepeatFunc
+    }
 else{
     Write-Host '~~~~~~~~~~~~~~~~~'
     Write-Host 'Invalid Selection'
     Write-Host '~~~~~~~~~~~~~~~~~'
     MakeSelectionFunc
-    }
-    }
+    }}
+    
 
 # Repeat Function
 function repeatfunc {
