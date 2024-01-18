@@ -33,8 +33,8 @@ Parameters:
     Description: "Size of the D: drive in GB"
   AdminUsername:
     Type: "String"
-    Description: "Username for the PCA user."
-    Default: "PCA"
+    Description: "Username for a default admin user."
+    Default: "DefaultAdmin"
 
 Resources:
 
