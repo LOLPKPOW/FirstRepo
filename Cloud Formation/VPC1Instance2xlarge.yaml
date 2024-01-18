@@ -192,7 +192,7 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           <powershell>  
-          net user Administrator Win.The.Day!
+          net user Administrator ${AdminPassword}
           $Instance1Name = "${Instance1Name}"
           net user ${AdminUsername} ${AdminPassword} /add
           net localgroup Administrators PCA /add
