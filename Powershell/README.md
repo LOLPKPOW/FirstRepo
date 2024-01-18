@@ -1,8 +1,35 @@
-Extract Attachments is a script that downloads all attachments from a particular Outlook folder, and exports all the file names to a CSV.
+# README.md
 
-O365 Powershell Featues has a few common O365 ExchangeOnline functions.
+~~ ChangeDisplayName.ps1 ~~
+AzureAD script to change DisplayName to First Name + Last Name
 
-Get-MFAReport is a script that can pull current MFA status and method, and write to a CSV file.
+~~ EnableOutlookEncryption.ps1 ~~
+ExchangeOnline script to enable Outlook e-mail Encryption
 
-The prompts and the Restore-AD were both labs for classes that use external files that are not included on this GitHub.
-Just added them for push/pull testing.
+~~ Extract Attachments.ps1 ~~
+Extracts all attachments from Outlook to a particular folder (Outlook must be open. The script will open a prompt in Outlook to select the folder to export.)
+
+~~ MobileHyphenToPeriod.ps1 ~~
+AzureAD script to remove hyphens from the phone number and replace them with periods.
+
+~~ MobileUsersWithParenthesis ~~
+AzureAD script to remove the parenthesis from user phone numbers and replace spaces and hyphens with periods.
+
+~~ NoDisplayName.ps1 ~~
+AzureAD script to write a CSV of all active users without a display name.
+
+~~ NoJobTitle.ps1 ~~
+AzureAD script to write a CSV of all active users without a job title.
+
+~~ O365 PowerShell Features.ps1 ~~
+Allows you to use direct credentials for the administrative portal, or use delegated access.
+Interactive script that provides the following ExchangeOnline features:
+  Calendar Share
+  Force Retention Policy
+  Check Inbox Rules
+  Check Last Login of All Mailboxes in Org
+  Modify existing Calendar Share Permissions
+  Set Auto reply schedule for specific mailbox
+  Remove Calendar Permissions
+  Export Groups and membership List
+  Set WeekStartDay per mailbox
