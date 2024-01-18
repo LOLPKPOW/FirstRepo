@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+# Parameters that require input prior to running Cloud Formation
+Parameters:
+  EnvironmentName:
+    Type: String
+    Description: "Name of the environment (e.g., dev, prod)"
+  AdminPassword:
+    Type: String
+    NoEcho: true
+    Description: "Password for the admin IAM user (Requires the following: Uppercase, Lowercase, Number, and Symbol)"
+  AdminUsername:
+    Type: String
+    NoEcho: true
+    Description: "Username for the admin IAM user"
+  S3BucketName:
+    Type: String
+    Description: "Name of the S3 bucket (Must be unique to AWS as a whole. Maybe use PCA-ClientName. Only characters, numbers, periods and dashes allowed.)"
+
+# Begin Resource Formation   
+Resources:
+
+  # IAM Groups
+  # Administrators Group (Full access)
+  AdminGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: Administrators
+      Policies:
+        - PolicyName: Administrator
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: "*"
+                Resource: "*"
+      Tags:
+        - Key: "Environment"
+          Value: !Ref EnvironmentName
+
+  # Read Only Group (Full Read-Only Access)
+  ReadOnlyGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: Read-Only
+      Policies:
+        - PolicyName: ReadOnlyAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: "*"
+                Resource: "*"
+      Tags:
+        - Key: "Environment"
+          Value: !Ref EnvironmentName
+
+  # Read Only Group + CloudFormation Invoke (Full Read-Only Access + Ability to invoke Cloud Formation Templates)
+  ReadOnlyCFInvokeGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: Read-Only-CF-Invoke
+      Policies:
+        - PolicyName: ReadOnlyCFInvokeGroupPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:CreateStack
+                  - cloudformation:UpdateStack
+                  - cloudformation:DeleteStack
+                Resource: "*"
+              - Effect: Allow
+                Action: "*"
+                Resource: "*"
+      Tags:
+        - Key: "Environment"
+          Value: !Ref EnvironmentName
+
+  # IAM User
+  AdminIAMUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Ref AdminUsername
+      LoginProfile:
+        Password: !Ref AdminPassword 
+      Groups:
+        - !Ref AdminGroup
+      Tags:
+        - Key: "Environment"
+          Value: !Ref EnvironmentName
+
+  # S3 Bucket
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: 
+        Fn::Sub: ${S3BucketName}
+      Tags:
+        - Key: "Environment"
+          Value: !Ref EnvironmentName
