@@ -1,4 +1,6 @@
 "# FirstRepo" 
-Powershell has some functional stuff in it, relating to O365.
+This is my personal repository of scripts and templates I've created that have been helpful.
 
-The remaining folders have nothing of value other than my practice. :)
+The Powershell section contains Office 365 ExchangeOnline/AzureAD scripts.
+
+Cloud Formation is beginning to grow, but it has a basic new tenant onboarding template and a basic new tenant resource template.
