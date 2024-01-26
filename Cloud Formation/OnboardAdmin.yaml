@@ -34,9 +34,6 @@ Resources:
               - Effect: Allow
                 Action: "*"
                 Resource: "*"
-      Tags:
-        - Key: "Environment"
-          Value: !Ref EnvironmentName
 
   # Read Only Group (Full Read-Only Access)
   ReadOnlyGroup:
@@ -51,9 +48,6 @@ Resources:
               - Effect: Allow
                 Action: "*"
                 Resource: "*"
-      Tags:
-        - Key: "Environment"
-          Value: !Ref EnvironmentName
 
   # Read Only Group + CloudFormation Invoke (Full Read-Only Access + Ability to invoke Cloud Formation Templates)
   ReadOnlyCFInvokeGroup:
@@ -74,9 +68,6 @@ Resources:
               - Effect: Allow
                 Action: "*"
                 Resource: "*"
-      Tags:
-        - Key: "Environment"
-          Value: !Ref EnvironmentName
 
   # IAM User
   AdminIAMUser:
