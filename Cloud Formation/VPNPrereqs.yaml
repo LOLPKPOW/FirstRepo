@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  CustomerGatewayIP:
+    Type: String
+    Description: "External IP address of the Customer Gateway"
+  BgpAsn:
+    Type: Number
+    Default: 65000
+    Description: "BGP Autonomous System Number for the Customer Gateway"
+  VpcId:
+    Type: String
+    Default: Enter VPC ID here
+    Description: "Enter VPC ID of the VPC you'd like to create the connection in."
+
+Resources:
+  # Customer Gateway
+  VPNCustomerGateway:
+    Type: "AWS::EC2::CustomerGateway"
+    Properties:
+      BgpAsn: !Ref BgpAsn
+      Type: "ipsec.1"
+      IpAddress: !Ref CustomerGatewayIP
+      Tags:
+        - Key: "Name"
+          Value: "VPN-Customer-Gateway"
+
+  # Virtual Private Gateway
+  VPNVirtualPrivateGateway:
+    Type: "AWS::EC2::VPNGateway"
+    Properties:
+      Type: "ipsec.1"
+      Tags:
+        - Key: "Name"
+          Value: "VPN-Virtual-Private-Gateway"
+
+  # Attach Virtual Private Gateway to VPC
+  AttachVPNGateway:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId: !Ref VpcId
+      VpnGatewayId: !Ref VPNVirtualPrivateGateway
+
+  # VPN Connection
+  VPNConnection:
+    Type: "AWS::EC2::VPNConnection"
+    Properties:
+      CustomerGatewayId: !Ref VPNCustomerGateway
+      VpnGatewayId: !Ref VPNVirtualPrivateGateway
+      Type: "ipsec.1"
+      StaticRoutesOnly: false
+      Tags:
+        - Key: "Name"
+          Value: "VPN-Connection"
+
+Outputs:
+  VPNConnectionID:
+    Value: !Ref VPNConnection
+    Description: "ID of the created VPN Connection"
