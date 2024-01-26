@@ -43,8 +43,8 @@ Parameters:
     Type: String
     Description: "Enter the AMI ID (be mindful of the region - AMI IDs are region specific - default displayed is Win Serv 2019 Base us-east-2)"
     Default: "ami-0cd3008ce2e0d1c0c"
-Resources:
 
+Resources:
 # Allows incoming DNS, HTTPS, and RDP. Allows all internal traffic.
   ServersSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
@@ -212,3 +212,16 @@ Resources:
     Properties:
       Domain: "vpc"
       InstanceId: !Ref Instance1
+
+Outputs:
+  VPCId:
+    Description: "VPC ID"
+    Value: !Ref MyVPC
+
+  Instance1ElasticIP:
+    Description: "Elastic IP assigned to Instance1"
+    Value: !Ref ElasticI
+
+  ServersSecurityGroupId:
+    Description: "ID of ServersSecurityGroup"
+    Value: !Ref ServersSecurityGroup
