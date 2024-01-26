@@ -15,7 +15,7 @@ Parameters:
     Description: "Username for the admin IAM user"
   S3BucketName:
     Type: String
-    Description: "Name of the S3 bucket (Must be unique to AWS as a whole. Maybe use PCA-ClientName. Only characters, numbers, periods and dashes allowed.)"
+    Description: "Name of the S3 bucket (Must be unique to AWS as a whole. Only characters, numbers, periods and dashes allowed.)"
 
 # Begin Resource Formation   
 Resources:

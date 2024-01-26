@@ -1,0 +1,214 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+# Define variable parameters
+Parameters:
+  VpcCidr:
+    Type: "String"
+    Default: "10.0.0.0/16"
+    Description: "CIDR block for the VPC. Default is 10.0.0.0/16. Must be a /16 including the subnet"
+  Subnet1Cidr:
+    Type: "String"
+    Default: "10.0.1.0/24"
+    Description: "CIDR block for Subnet 1. Default is 10.0.1.0/24."
+  Instance1PrivateIp:
+    Type: "String"
+    Default: "10.0.1.10"
+    Description: "Private IP address for Instance 1. Default is 10.0.1.10. Must be within chosen subnet."
+  KeyPairName:
+    Type: "String"
+    Description: "Name of the EC2 key pair."
+  AdminPassword:
+    Type: "String"
+    Description: "Administrator password for Windows instances."
+  Instance1Name:
+    Type: "String"
+    Description: "Name for Instance 1."
+  CDriveSizeInstance1:
+    Type: Number
+    Default: 100
+    Description: "Size of the C: (OS) drive in GB"  
+  DDriveSizeInstance1:
+    Type: Number
+    Default: 50
+    Description: "Size of the D: (Data) drive in GB"
+  AdminUsername:
+    Type: "String"
+    Description: "Username for a default admin user."
+    Default: "DefaultAdmin"
+  InstanceType:
+    Type: "String"
+    Description: "Enter the instance type (i.e. t3.2xlarge)"
+    Default: "t3.2xlarge"
+  AMIID:
+    Type: String
+    Description: "Enter the AMI ID (be mindful of the region - AMI IDs are region specific - default displayed is Win Serv 2019 Base us-east-2)"
+    Default: "ami-0cd3008ce2e0d1c0c"
+Resources:
+
+# Allows incoming DNS, HTTPS, and RDP. Allows all internal traffic.
+  ServersSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupName: "Default Servers"
+      GroupDescription: "Basic Security Group for Servers"
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress:
+        - CidrIp: !Ref Subnet1Cidr  # Allow all traffic within the same subnet
+          IpProtocol: -1
+        - IpProtocol: "udp"  # DNS
+          CidrIp: "0.0.0.0/0"
+          FromPort: 53
+          ToPort: 53
+        - IpProtocol: "tcp"  # HTTPS
+          CidrIp: "0.0.0.0/0"
+          FromPort: 443
+          ToPort: 443
+        - IpProtocol: "tcp"  # RDP
+          CidrIp: "0.0.0.0/0"
+          FromPort: 3389
+          ToPort: 3389
+        - IpProtocol: "icmp"
+          CidrIp: "0.0.0.0/0"
+          FromPort: "-1"
+          ToPort: "-1"
+# Allows all outgoing traffic.                    
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: !Ref Subnet1Cidr  # Allow all outbound traffic within the same subnet
+        - IpProtocol: "udp"
+          CidrIp: "0.0.0.0/0"  # Example: Allow outbound UDP traffic
+          FromPort: 0
+          ToPort: 65535
+        - IpProtocol: "tcp"
+          CidrIp: "0.0.0.0/0"  # Example: Allow outbound TCP traffic
+          FromPort: 0
+          ToPort: 65535
+        - IpProtocol: "icmp"
+          CidrIp: "0.0.0.0/0"
+          FromPort: "-1"
+          ToPort: "-1"
+
+# Creates Administrators Group (retains current group if it already exists)         
+#  AdministratorsGroup:
+#    Type: "AWS::IAM::Group"
+#    Properties:
+#      GroupName: "Administrators"
+#    UpdateReplacePolicy: "Retain"
+
+# Attached permissions to Administrators Group (replaces existing permissions for Administrators Group)
+#  AttachAdminPolicy:
+#    Type: "AWS::IAM::ManagedPolicy"
+#    Properties:
+#      PolicyDocument:
+#        Version: "2012-10-17"
+#        Statement:
+#          - Effect: "Allow"
+#            Action: "*"
+#            Resource: "*"
+#      Groups:
+#        - !Ref AdministratorsGroup
+#    UpdatePolicy:
+#      Select: "Replace"
+#      Parameters:
+#        ForceUpdate: "true"
+# Create IAM User and add to Administrator Group
+#  MyIAMUser:
+#    Type: "AWS::IAM::User"
+#    Properties:
+#      UserName: "**" # Fill Username Appropriately
+#      Groups:
+#        - !Ref AdministratorsGroup
+#    UpdateReplacePolicy: "Retain"
+# Create VPC with referenced subnet
+  MyVPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+# Create subnet with specified range and autoassign public IP
+  Subnet1:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: !Ref Subnet1Cidr
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+
+  AttachGateway:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  RouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref MyVPC
+
+  Association:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref Subnet1
+      RouteTableId: !Ref RouteTable
+
+# Add route to the internet
+  Route:
+    Type: "AWS::EC2::Route"
+    DependsOn: "AttachGateway"
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+
+  KeyPair:
+    Type: "AWS::EC2::KeyPair"
+    Properties:
+      KeyName: !Ref KeyPairName
+
+  Instance1:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref AMIID
+      # Reference to Specified Subnet      
+      SubnetId: !Ref Subnet1
+      # Reference to Specified IP Address
+      PrivateIpAddress: !Ref Instance1PrivateIp
+      # Reference to the created Key Pair
+      KeyName: !Ref KeyPairName
+      # Reference to the created security group
+      SecurityGroupIds:
+        - !Ref ServersSecurityGroup 
+      # Specify name tag   
+      Tags:
+        - Key: "Name"
+          Value: !Ref Instance1Name
+      BlockDeviceMappings:
+        - DeviceName: "/dev/sda1"  # Instance1 Root volume (C:)
+          Ebs:
+            VolumeSize: !Ref CDriveSizeInstance1
+
+        - DeviceName: "/dev/sdb"  # Instance1 Additional volume (D:)
+          Ebs:
+            VolumeSize: !Ref DDriveSizeInstance1             
+      # Powershell Commands           
+      UserData:
+        Fn::Base64: !Sub |
+          <powershell>  
+          net user Administrator ${AdminPassword}
+          $Instance1Name = "${Instance1Name}"
+          net user ${AdminUsername} ${AdminPassword} /add
+          net localgroup Administrators PCA /add
+          netdom renamecomputer %computername% /NewName:$Instance1Name
+          </powershell>   
+  
+  # Add Elastic IP for Instance1
+  ElasticIP:
+    Type: "AWS::EC2::EIP"
+    Properties:
+      Domain: "vpc"
+      InstanceId: !Ref Instance1
