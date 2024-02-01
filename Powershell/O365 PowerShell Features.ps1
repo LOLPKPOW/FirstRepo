@@ -76,6 +76,54 @@ function ModifyCalendarFunc {
         Write-Output $CalendarToShare
         }
 
+# Shared Contacts Function (and send notification upon completed sharing)
+function SharedContactsFunc {
+    $ContactsToShare = Read-Host -Prompt 'Enter the e-mail of the user who has the contacts you want to share'
+    $ContactsToShare = $ContactsToShare + ':\Contacts'
+    $ContactsSharedTo = Read-Host -Prompt 'Enter the e-mail of the user who needs access to the contacts'
+    $ContactsPermission = Read-Host -Prompt 'Enter 1 for Read-Only, and 2 for Read-Write'
+    
+    if ($ContactsPermission -eq 1) {
+        $ContactsPermission = 'Reviewer'
+    }
+    elseif ($ContactsPermission -eq 2) {
+        $ContactsPermission = 'PublishingEditor'
+    }
+    
+    Add-MailboxFolderPermission -Identity $ContactsToShare -User $ContactsSharedTo -AccessRights $ContactsPermission -SendNotificationToUser $true
+    Write-Host 'Notification Sent of Permission Granted'
+}
+
+# Remove Contacts Permissions
+function RemoveContactsFunc {
+    $ContactsToShare = Read-Host -Prompt 'Enter the e-mail of the user who has the contacts you want to remove permissions from'
+    $ContactsToShare = $ContactsToShare + ':\Contacts'
+    $ContactsSharedTo = Read-Host -Prompt 'Enter the e-mail of the user who needs permissions removed'
+    Remove-MailboxFolderPermission -Identity $ContactsToShare -User $ContactsSharedTo
+    Write-Host $ContactsSharedTo, 'has had permissions removed from the contacts of', $ContactsToShare
+}
+
+# Modify Contacts Permissions
+function ModifyContactsFunc {
+    $ContactsToShare = Read-Host -Prompt 'Enter the e-mail of the user who has the contacts you want to share'
+    $ContactsToShare = $ContactsToShare + ':\Contacts'
+    $ContactsSharedTo = Read-Host -Prompt 'Enter the e-mail of the user who needs access to the contacts'
+    $ContactsPermission = Read-Host -Prompt 'Enter 1 for Read-Only, and 2 for Read-Write'
+    
+    if ($ContactsPermission -eq 1) {
+        $ContactsPermission = 'Reviewer'
+    }
+    elseif ($ContactsPermission -eq 2) {
+        $ContactsPermission = 'PublishingEditor'
+    }
+    
+    Set-MailboxFolderPermission -Identity $ContactsToShare -User $ContactsSharedTo -AccessRights $ContactsPermission -SendNotificationToUser $true
+    Write-Host 'Permissions Modified'
+    Write-Output $ContactsSharedTo, "has", $ContactsPermission, "to", "$ContactsToShare", "Contacts"
+    Write-Output $ContactsPermission
+    Write-Output $ContactsToShare
+}
+
 
 # Force Retention Policy Function
 function ForceRetentionPolicyFunc {
@@ -157,6 +205,9 @@ Write-Host 'Set Auto Reply schedule for specific mailbox: Press 6'
 Write-Host 'Remove Calendar Permissions: Press 7'
 Write-Host 'Export Groups and Membership List: Press 8'
 Write-Host 'Set WeekStartDay per mailbox: Press 9'
+Write-Host 'Contact Share: Press 10'
+Write-Host 'Remove Contacts Permissions: Press 11'
+Write-Host 'Modify Contact Sharing Permissions: Press 12'
 
 $selection = Read-Host -Prompt 'Enter Selection'
 if ($selection -eq 1){
@@ -195,6 +246,17 @@ elseif ($Selection -eq 9){
     SetWeekStartDayFunc | Out-Host
     RepeatFunc
     }
+elseif ($Selection -eq 10){
+    SharedContactsFunc | Out-Host
+    RepeatFunc
+    }
+elseif ($Selection -eq 11){
+    RemoveContactsFunc | Out-Host
+    RepeatFunc
+    }
+elseif ($Selection -eq 12){
+    ModifyContactsFunc | Out-Host
+    RepeatFunc
 else{
     Write-Host '~~~~~~~~~~~~~~~~~'
     Write-Host 'Invalid Selection'
