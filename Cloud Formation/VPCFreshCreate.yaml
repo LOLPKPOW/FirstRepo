@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+# Define variable parameters
+Parameters:
+  VpcCidr:
+    Type: "String"
+    Default: "10.0.0.0/16"
+    Description: "CIDR block for the VPC. Default is 10.0.0.0/16. Must be a /16 including the subnet"
+  Subnet1Cidr:
+    Type: "String"
+    Default: "10.0.1.0/24"
+    Description: "CIDR block for Subnet 1. Default is 10.0.1.0/24."
+
+Resources:
+# Allows incoming DNS, HTTPS, and RDP. Allows all internal traffic.
+  ServersSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupName: "Default Servers"
+      GroupDescription: "Basic Security Group for Servers"
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress:
+        - CidrIp: !Ref Subnet1Cidr  # Allow all traffic within the same subnet
+          IpProtocol: -1
+        - IpProtocol: "udp"  # DNS
+          CidrIp: "0.0.0.0/0"
+          FromPort: 53
+          ToPort: 53
+        - IpProtocol: "tcp"  # HTTPS
+          CidrIp: "0.0.0.0/0"
+          FromPort: 443
+          ToPort: 443
+        - IpProtocol: "tcp"  # RDP
+          CidrIp: "0.0.0.0/0"
+          FromPort: 3389
+          ToPort: 3389
+        - IpProtocol: "icmp"
+          CidrIp: "0.0.0.0/0"
+          FromPort: "-1"
+          ToPort: "-1"
+# Allows all outgoing traffic.                    
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: !Ref Subnet1Cidr  # Allow all outbound traffic within the same subnet
+        - IpProtocol: "udp"
+          CidrIp: "0.0.0.0/0"  # Example: Allow outbound UDP traffic
+          FromPort: 0
+          ToPort: 65535
+        - IpProtocol: "tcp"
+          CidrIp: "0.0.0.0/0"  # Example: Allow outbound TCP traffic
+          FromPort: 0
+          ToPort: 65535
+        - IpProtocol: "icmp"
+          CidrIp: "0.0.0.0/0"
+          FromPort: "-1"
+          ToPort: "-1"
+
+# Create VPC with referenced subnet
+  MyVPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+# Create subnet with specified range and autoassign public IP
+  Subnet1:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: !Ref Subnet1Cidr
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+
+  AttachGateway:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  RouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref MyVPC
+
+  Association:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref Subnet1
+      RouteTableId: !Ref RouteTable
+
+# Add route to the internet
+  Route:
+    Type: "AWS::EC2::Route"
+    DependsOn: "AttachGateway"
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
