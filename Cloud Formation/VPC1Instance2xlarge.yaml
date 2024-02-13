@@ -163,8 +163,6 @@ Resources:
       SubnetId: !Ref Subnet1
       # Reference to Specified IP Address
       PrivateIpAddress: !Ref Instance1PrivateIp
-      # Reference to the created Key Pair
-      KeyName: !Ref KeyPairName
       # Reference to the created security group
       SecurityGroupIds:
         - !Ref ServersSecurityGroup 
