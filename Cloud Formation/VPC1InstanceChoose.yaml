@@ -204,16 +204,3 @@ Resources:
     Properties:
       Domain: "vpc"
       InstanceId: !Ref Instance1
-
-Outputs:
-  VPCId:
-    Description: "VPC ID"
-    Value: !Ref MyVPC
-
-  Instance1ElasticIP:
-    Description: "Elastic IP assigned to Instance1"
-    Value: !Ref ElasticI
-
-  ServersSecurityGroupId:
-    Description: "ID of ServersSecurityGroup"
-    Value: !Ref ServersSecurityGroup
