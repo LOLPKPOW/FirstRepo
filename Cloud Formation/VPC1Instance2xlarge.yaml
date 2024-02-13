@@ -14,9 +14,6 @@ Parameters:
     Type: "String"
     Default: "10.0.1.10"
     Description: "Private IP address for Instance 1. Default is 10.0.1.10. Must be within chosen subnet."
-  KeyPairName:
-    Type: "String"
-    Description: "Name of the EC2 key pair."
   AdminPassword:
     Type: "String"
     Description: "Administrator password for Windows instances."
@@ -156,11 +153,6 @@ Resources:
       RouteTableId: !Ref RouteTable
       DestinationCidrBlock: "0.0.0.0/0"
       GatewayId: !Ref InternetGateway
-
-  KeyPair:
-    Type: "AWS::EC2::KeyPair"
-    Properties:
-      KeyName: !Ref KeyPairName
 
   Instance1:
     Type: "AWS::EC2::Instance"
