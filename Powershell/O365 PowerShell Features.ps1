@@ -209,6 +209,7 @@ Write-Host 'Contact Share: Press 10'
 Write-Host 'Remove Contacts Permissions: Press 11'
 Write-Host 'Modify Contact Sharing Permissions: Press 12'
 
+
 $selection = Read-Host -Prompt 'Enter Selection'
 if ($selection -eq 1){
     SharedCalendarFunc | Out-Host
@@ -262,7 +263,7 @@ else{
     Write-Host 'Invalid Selection'
     Write-Host '~~~~~~~~~~~~~~~~~'
     MakeSelectionFunc
-    }}
+    }}}
     
 
 # Repeat Function
@@ -279,4 +280,4 @@ function repeatfunc {
 
 # Run the script
     loginfunc
-    MakeSelectionFunc
+   # MakeSelectionFunc
