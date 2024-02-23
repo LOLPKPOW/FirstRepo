@@ -85,37 +85,6 @@ Resources:
           FromPort: "-1"
           ToPort: "-1"
 
-# Creates Administrators Group (retains current group if it already exists)         
-#  AdministratorsGroup:
-#    Type: "AWS::IAM::Group"
-#    Properties:
-#      GroupName: "Administrators"
-#    UpdateReplacePolicy: "Retain"
-
-# Attached permissions to Administrators Group (replaces existing permissions for Administrators Group)
-#  AttachAdminPolicy:
-#    Type: "AWS::IAM::ManagedPolicy"
-#    Properties:
-#      PolicyDocument:
-#        Version: "2012-10-17"
-#        Statement:
-#          - Effect: "Allow"
-#            Action: "*"
-#            Resource: "*"
-#      Groups:
-#        - !Ref AdministratorsGroup
-#    UpdatePolicy:
-#      Select: "Replace"
-#      Parameters:
-#        ForceUpdate: "true"
-# Create IAM User and add to Administrator Group
-#  MyIAMUser:
-#    Type: "AWS::IAM::User"
-#    Properties:
-#      UserName: "**" # Fill Username Appropriately
-#      Groups:
-#        - !Ref AdministratorsGroup
-#    UpdateReplacePolicy: "Retain"
 # Create VPC with referenced subnet
   MyVPC:
     Type: "AWS::EC2::VPC"
