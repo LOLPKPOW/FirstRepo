@@ -12,7 +12,7 @@ Parameters:
     Description: "CIDR block for Subnet 1. Default is 10.0.1.0/24."
 
 Resources:
-# Allows incoming DNS, HTTPS, and RDP. Allows all internal traffic.
+  # Allows incoming DNS, HTTPS, and RDP. Allows all internal traffic.
   ServersSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
@@ -38,7 +38,7 @@ Resources:
           CidrIp: "0.0.0.0/0"
           FromPort: "-1"
           ToPort: "-1"
-# Allows all outgoing traffic.                    
+      # Allows all outgoing traffic.
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: !Ref Subnet1Cidr  # Allow all outbound traffic within the same subnet
@@ -55,14 +55,15 @@ Resources:
           FromPort: "-1"
           ToPort: "-1"
 
-# Create VPC with referenced subnet
+  # Create VPC with referenced subnet
   MyVPC:
     Type: "AWS::EC2::VPC"
     Properties:
       CidrBlock: !Ref VpcCidr
       EnableDnsSupport: true
       EnableDnsHostnames: true
-# Create subnet with specified range and autoassign public IP
+
+  # Create subnet with specified range and autoassign public IP
   Subnet1:
     Type: "AWS::EC2::Subnet"
     Properties:
@@ -91,7 +92,7 @@ Resources:
       SubnetId: !Ref Subnet1
       RouteTableId: !Ref RouteTable
 
-# Add route to the internet
+  # Add route to the internet
   Route:
     Type: "AWS::EC2::Route"
     DependsOn: "AttachGateway"
@@ -99,3 +100,15 @@ Resources:
       RouteTableId: !Ref RouteTable
       DestinationCidrBlock: "0.0.0.0/0"
       GatewayId: !Ref InternetGateway
+
+# Outputs
+Outputs:
+  VPCId:
+    Description: "ID of the created VPC"
+    Value: !Ref MyVPC
+  SubnetId:
+    Description: "ID of the created subnet"
+    Value: !Ref Subnet1
+  SecurityGroupId:
+    Description: "ID of the created security group"
+    Value: !Ref ServersSecurityGroup

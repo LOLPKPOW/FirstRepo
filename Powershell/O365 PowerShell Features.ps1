@@ -280,4 +280,4 @@ function repeatfunc {
 
 # Run the script
     loginfunc
-   # MakeSelectionFunc
+    MakeSelectionFunc
