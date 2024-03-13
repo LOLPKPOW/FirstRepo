@@ -48,7 +48,7 @@ Resources:
       CustomerGatewayId: !Ref VPNCustomerGateway
       VpnGatewayId: !Ref VPNVirtualPrivateGateway
       Type: "ipsec.1"
-      StaticRoutesOnly: false
+      StaticRoutesOnly: true
       Tags:
         - Key: "Name"
           Value: "VPN-Connection"
